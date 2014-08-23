@@ -7,9 +7,9 @@
 #define COSTVOLUME_HPP
 
 
-#include <opencv2/gpu/gpu.hpp>
-#include <opencv2/gpu/stream_accessor.hpp>
+#include <opencv2/core/cuda.hpp>
 #include "CostVolume.cuh"
+
 typedef  int FrameID;
 
 class CostVolume
