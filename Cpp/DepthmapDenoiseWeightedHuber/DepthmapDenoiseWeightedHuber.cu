@@ -1,10 +1,10 @@
-#include <opencv2/gpu/device/common.hpp>//for cudaSafeCall
+#include <opencv2/core/cuda/common.hpp>
 #include <opencv2/core/core.hpp>//for CV_Assert
 #include "DepthmapDenoiseWeightedHuber.cuh"
 
 typedef unsigned int uint;
 
-namespace cv { namespace gpu { namespace device {
+namespace cv { namespace cuda {
     namespace dtam_denoise{
 
 
@@ -23,7 +23,7 @@ const int BLOCKX2D=32;
 const int BLOCKY2D=32;
 #define GENERATE_CUDA_FUNC2D(funcName,arglist,notypes)                                     \
 static __global__ void funcName arglist;                                                        \
-void funcName##Caller arglist{                                                           \
+void funcName##Caller arglisGENERATE_CUDA_FUNC2Dt{                                                           \
    dim3 dimBlock(BLOCKX2D,BLOCKY2D);                                                                  \
    dim3 dimGrid((acols  + dimBlock.x - 1) / dimBlock.x,                                  \
                 (arows + dimBlock.y - 1) / dimBlock.y);                                  \
@@ -890,4 +890,4 @@ GENERATE_CUDA_FUNC2DROWS(updateD,
 }
 
 
-}}}}
+}}}

@@ -16,8 +16,8 @@
 
 
 
-namespace cv { namespace gpu { namespace device {
-    namespace dtam_optimizer{
+namespace cv { namespace cuda { namespace dtam_optimizer {
+
 
 static unsigned int arows,acols;
 
@@ -1067,8 +1067,4 @@ GENERATE_CUDA_FUNC2DROWS(updateD,
     }
 }
 
-}}}}
-
-
-
-
+}}}

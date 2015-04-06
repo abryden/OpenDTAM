@@ -6,9 +6,10 @@
 #ifndef DepthmapDenoiseWeightedHuber_H
 #define DepthmapDenoiseWeightedHuber_H
 #include <opencv2/core/core.hpp>//for CV_EXPORTS
-#include <opencv2/gpu/gpu.hpp>
+#include <opencv2/core/cuda.hpp>
+
 namespace cv{
-    namespace gpu{
+    namespace cuda{
         /////////////////////////////////////////
         // DepthMapDenoiseWeightedHuber
 
@@ -52,10 +53,10 @@ namespace cv{
 }
 
     
-#include <opencv2/gpu/gpu.hpp>
+#include <opencv2/core/cuda.hpp>
 
 namespace cv{
-    namespace gpu{
+    namespace cuda{
         /////////////////////////////////////////
         // DepthMapDenoiseWeightedHuber
 

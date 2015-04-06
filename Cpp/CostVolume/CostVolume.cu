@@ -3,10 +3,7 @@
 #include <opencv2/core/core.hpp>
 #include "CostVolume.cuh"
 
-
-
-namespace cv { namespace gpu { namespace device {
-    namespace dtam_updateCost{
+namespace cv { namespace cuda { namespace dtam_updateCost {
 
 cudaStream_t localStream;
 
@@ -15,6 +12,7 @@ cudaStream_t localStream;
 
 #define BLOCK_X 64
 #define BLOCK_Y 4
+
 __global__ void globalWeightedBoundsCost(m34 p,float weight, CONSTT);
 void globalWeightedBoundsCostCaller(m34 p,float weight,CONSTT){
    dim3 dimBlock(BLOCK_X,BLOCK_Y);
@@ -686,7 +684,7 @@ __global__ void weightedBoundsCost2(m34 p,m34 p2,float weight, CONSTT,cudaTextur
 
 
 
-}}}}
+}}}
 
 
 

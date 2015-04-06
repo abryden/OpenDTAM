@@ -8,6 +8,7 @@
 
 
 #include <opencv2/core/cuda.hpp>
+#include <opencv2/core/cuda_stream_accessor.hpp>
 #include "CostVolume.cuh"
 
 typedef  int FrameID;
@@ -32,20 +33,20 @@ public:
     
     cv::Mat projection;//projects world coordinates (x,y,z) into (rows,cols,layers)
 
-    cv::gpu::GpuMat baseImage;
-    cv::gpu::GpuMat baseImageGray;
-    cv::gpu::GpuMat lo;
-    cv::gpu::GpuMat hi;
-    cv::gpu::GpuMat loInd;
+    cv::cuda::GpuMat baseImage;
+    cv::cuda::GpuMat baseImageGray;
+    cv::cuda::GpuMat lo;
+    cv::cuda::GpuMat hi;
+    cv::cuda::GpuMat loInd;
 
     float * data;
     float * hits;
 
-    cv::gpu::GpuMat dataContainer;
-    cv::gpu::GpuMat hitContainer;
+    cv::cuda::GpuMat dataContainer;
+    cv::cuda::GpuMat hitContainer;
 
     int count;
-    cv::gpu::Stream cvStream;
+    cv::cuda::Stream cvStream;
 
     void updateCost(const cv::Mat& image, const cv::Mat& R, const cv::Mat& T);//Accepts pinned RGBA8888 or BGRA8888 for high speed
     
@@ -58,7 +59,7 @@ public:
     //HACK: remove this function in release
     cv::Mat downloadOldStyle( int layer){
         cv::Mat cost;
-        cv::gpu::GpuMat tmp=dataContainer.rowRange(layer,layer+1);
+        cv::cuda::GpuMat tmp=dataContainer.rowRange(layer,layer+1);
         tmp.download(cost);
         cost=cost.reshape(0,rows);
         return cost;
@@ -79,7 +80,7 @@ private:
     void solveProjection(const cv::Mat& R, const cv::Mat& T);
     void checkInputs(const cv::Mat& R, const cv::Mat& T,
             const cv::Mat& _cameraMatrix);
-    void simpleTex(const cv::Mat& image,cv::gpu::Stream cvStream=cv::gpu::Stream::Null());
+    void simpleTex(const cv::Mat& image,cv::cuda::Stream cvStream=cv::cuda::Stream::Null());
 
 private:
     //temp variables ("static" containers)

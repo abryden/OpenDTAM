@@ -8,13 +8,13 @@ cmake_policy(SET CMP0012 NEW)
 if (CMAKE_SYSTEM_NAME MATCHES Windows)
 add_definitions( -DBOOST_ALL_NO_LIB )
 else()
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb ")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb -fdiagnostics-color=always")
 endif()
 
-find_package( OpenCV 2.4 REQUIRED )
+find_package( OpenCV 3 REQUIRED )
 find_package( Qt5Core REQUIRED)
 find_package(CUDA REQUIRED)
-find_package(Boost COMPONENTS system thread filesystem chrono)
+find_package(Boost REQUIRED COMPONENTS system thread filesystem chrono)
 #add_definitions( -D__OPENCV_BUILD=1 )
 #message(STATUS ${OpenCV_CONSIDERED_CONFIGS})
 
@@ -51,14 +51,21 @@ add_subdirectory(Scheduler)
 
 include_directories("${BASEPATH}" ${CUDA_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -gencode arch=compute_30,code=sm_30; -gencode arch=compute_35,code=sm_35;--use_fast_math ;--restrict; -lineinfo; -O3)
-
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
+  -gencode arch=compute_30,code=sm_30;
+  -gencode arch=compute_35,code=sm_35;
+  -gencode arch=compute_50,code=sm_50;
+  --use_fast_math;
+  --restrict;
+  -lineinfo;
+  -O3
+)
 if (CMAKE_SYSTEM_NAME MATCHES Windows)
 cuda_add_executable(OpenDTAMDemo ${DTAM_SOURCES} OpenDTAM.cpp  testprog.cpp convertAhandaPovRayToStandard.cpp graphics.cpp fileLoader.cpp)
 target_link_libraries(OpenDTAMDemo ${OpenCV_LIBS} ${Boost_LIBRARIES})
 else()
 cuda_add_library(OpenDTAM SHARED ${DTAM_SOURCES} OpenDTAM.cpp)
-target_link_libraries(OpenDTAM ${OpenCV_LIBS})
+target_link_libraries(OpenDTAM ${OpenCV_LIBS} ${Boost_LIBRARIES})
 add_executable (a.out testprog.cpp convertAhandaPovRayToStandard.cpp graphics.cpp fileLoader.cpp)
 target_link_libraries( a.out  OpenDTAM ${OpenCV_LIBS} ${Boost_LIBRARIES})
 endif()

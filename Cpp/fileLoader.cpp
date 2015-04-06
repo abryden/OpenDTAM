@@ -1,7 +1,10 @@
 // loads all files of a given name and extension
 #include "fileLoader.hpp"
-    #include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include <fstream>
+#include <iostream>
+#include <set>
     
     using namespace cv;
     using namespace std;

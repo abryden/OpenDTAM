@@ -37,7 +37,7 @@ const static bool valgrind=0;
 
 //A test program to make the mapper run
 using namespace cv;
-using namespace cv::gpu;
+using namespace cv::cuda;
 using namespace std;
 
 int App_main( int argc, char** argv );
@@ -84,10 +84,8 @@ int App_main( int argc, char** argv )
         Mat tmp,d,image;
         int offset=0;
         if(inc>0){
-            
-//         loadAhanda("/home/paulf/Downloads/60fps_images_archieve/",
+        loadAhanda(argv[1],
 //         loadAhanda("/home/paulf/Downloads/traj_over_table/",
-        loadAhanda(argc == 2 ? argv[1] : "/home/paulf/Downloads/60fps_images_archieve/",
                    65535,
                    i+offset,
                    image,
@@ -130,17 +128,7 @@ int App_main( int argc, char** argv )
             inc=-1;
     }
     numImg=numImg*2-2;
-//     {//random first image
-//         cout<<LieSub(RTToLie(Rs0[0],Ts0[0]),RTToLie(Rs0[1],Ts0[1]))<<endl;
-//         Ts[0]=Ts0[1].clone();
-//         Ts[1]=Ts0[1].clone();
-//         randu(Ts[1] ,Scalar(-1),Scalar(1));
-//         Ts[1]=Ts0[0]+Ts[1];
-//         cout<<Ts[1]-Ts0[0]<<endl;
-//         Rs[0]=Rs0[0].clone();
-//         Rs[1]=Rs0[0].clone();
-//     }
-    CudaMem cret(images[0].rows,images[0].cols,CV_32FC1);
+    HostMem cret(images[0].rows,images[0].cols,CV_32FC1);
     ret=cret.createMatHeader();
     //Setup camera matrix
     double sx=reconstructionScale;
@@ -168,10 +156,9 @@ int App_main( int argc, char** argv )
 //     }
     
     CostVolume cv(images[startAt],(FrameID)startAt,layers,0.015,0.0,Rs[startAt],Ts[startAt],cameraMatrix,occlusionThreshold,norm);
-    
- 
-    
-    cv::gpu::Stream s;
+
+	
+    cv::cuda::Stream s;
     double totalscale=1.0;
     int tcount=0;
     int sincefail=0;
@@ -218,8 +205,8 @@ int App_main( int argc, char** argv )
             Optimizer optimizer(cv);
             optimizer.initOptimization();
             GpuMat a(cv.loInd.size(),cv.loInd.type());
-//             cv.loInd.copyTo(a,cv.cvStream);
-            cv.cvStream.enqueueCopy(cv.loInd,a);
+             cv.loInd.copyTo(a,cv.cvStream);
+//            cv.cvStream.enqueueCopy(cv.loInd,a);
             GpuMat d;
             denoiser.cacheGValues();
             ret=image*0;

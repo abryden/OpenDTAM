@@ -7,22 +7,18 @@
 #include "CostVolume.cuh"
 
 #include <opencv2/core/operations.hpp>
-#include <opencv2/gpu/stream_accessor.hpp>
-#include <opencv2/gpu/device/common.hpp>
+#include <opencv2/core/cuda_stream_accessor.hpp>
+#include <opencv2/core/cuda/common.hpp>
+#include <opencv2/cudaimgproc.hpp>
 
 #include "utils/utils.hpp"
 #include "utils/tinyMat.hpp"
 #include "graphics.hpp"
 #include <iostream>
 
-
 using namespace std;
 using namespace cv;
-using namespace cv::gpu;
-
-
-
-
+using namespace cv::cuda;
 
 void CostVolume::solveProjection(const cv::Mat& R, const cv::Mat& T) {
     Mat P;
@@ -78,10 +74,10 @@ void CostVolume::checkInputs(const cv::Mat& R, const cv::Mat& T,
 #define FLATUP(src,dst){GpuMat tmp;tmp.upload(src);dst.create(1,rows*cols, src.type());dst=dst.reshape(0,rows);}
 #define FLATALLOC(n) n.create(1,rows*cols, CV_32FC1);n=n.reshape(0,rows)
 CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
-        float _far, cv::Mat R, cv::Mat T, cv::Mat _cameraMatrix,float occlusionThreshold,
+        float _far, cv::Mat R, cv::Mat T, cv::Mat _cameraMatrix, float occlusionThreshold,
         Norm norm, float initialCost, float initialWeight)
-        : 
-        R(R),T(T),occlusionThreshold(occlusionThreshold),norm(norm),initialWeight(initialWeight),_cuArray(0) {
+        :
+        R(R),T(T),occlusionThreshold(occlusionThreshold),norm(norm),initialWeight(initialWeight),_cuArray(){
 
     //For performance reasons, OpenDTAM only supports multiple of 32 image sizes with cols >= 64
     CV_Assert(image.rows % 32 == 0 && image.cols % 32 == 0 && image.cols >= 64);
@@ -101,20 +97,26 @@ CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
     FLATALLOC(hi);
     FLATALLOC(loInd);
     dataContainer.create(layers, rows * cols, CV_32FC1);
-    
-    GpuMat tmp;
-    baseImage.upload(image.reshape(0,1));
-    cvtColor(baseImage,baseImageGray,CV_RGB2GRAY);
+
+    Mat bwImage;
+    image=image.reshape(0,1);
+    cv::cvtColor(image, bwImage, CV_RGB2GRAY);
+    baseImage.upload(image);
+    baseImageGray.upload(bwImage);
     baseImage=baseImage.reshape(0,rows);
     baseImageGray=baseImageGray.reshape(0,rows);
-    cvStream.enqueueMemSet(loInd,0.0);
-    cvStream.enqueueMemSet(dataContainer,initialCost);
+
+    loInd.setTo(Scalar(0, 0, 0),cvStream);
+    dataContainer.setTo(Scalar(initialCost),cvStream);
+
     data = (float*) dataContainer.data;
     hitContainer.create(layers, rows * cols, CV_32FC1);
-    hitContainer = initialWeight;
+    hitContainer.setTo(initialWeight);
     hits = (float*) hitContainer.data;
     count = 0;
-    
+
+
+
     //messy way to disguise cuda objects
     _cuArray=Ptr<char>((char*)(new cudaArray_t));
     *((cudaArray**)(char*)_cuArray)=0;
@@ -130,7 +132,7 @@ CostVolume::CostVolume(Mat image, FrameID _fid, int _layers, float _near,
 
 
 
-void CostVolume::simpleTex(const Mat& image,Stream cvStream){
+void CostVolume::simpleTex(const Mat& image, Stream cvStream){
     cudaArray_t& cuArray=*((cudaArray_t*)(char*)_cuArray);
     cudaArray_t& cuArray2=*((cudaArray_t*)(char*)_cuArray2);
     cudaTextureObject_t& texObj=*((cudaTextureObject_t*)(char*)_texObj);
@@ -183,10 +185,9 @@ void CostVolume::simpleTex(const Mat& image,Stream cvStream){
    //return texObj;
 }
 
-
 void CostVolume::updateCost(const Mat& _image, const cv::Mat& R, const cv::Mat& T){
-    using namespace cv::gpu::device::dtam_updateCost;
-    localStream = cv::gpu::StreamAccessor::getStream(cvStream);
+    using namespace cv::cuda::dtam_updateCost;
+    localStream = cv::cuda::StreamAccessor::getStream(cvStream);
     
     // 0  1  2  3
     // 4  5  6  7
@@ -217,16 +218,16 @@ void CostVolume::updateCost(const Mat& _image, const cv::Mat& R, const cv::Mat& 
                 cBuffer.create(_image.rows,_image.cols,CV_8UC4);
                 Mat cm=cBuffer;//.createMatHeader();
                 if(_image.type()==CV_8UC1||_image.type()==CV_8SC1){
-                    cvtColor(_image,cm,CV_GRAY2BGRA);
+                    cv::cvtColor(_image,cm,CV_GRAY2BGRA);
                 }else if(_image.type()==CV_8UC3||_image.type()==CV_8SC3){
-                    cvtColor(_image,cm,CV_BGR2BGRA);
+                    cv::cvtColor(_image,cm,CV_BGR2BGRA);
                 }else{
                     image=_image;
                     if(_image.channels()==1){
-                        cvtColor(image,image,CV_GRAY2BGRA);
+                        cv::cvtColor(image,image,CV_GRAY2BGRA);
                     }
                     if(_image.channels()==3){
-                        cvtColor(image,image,CV_BGR2BGRA);
+                        cv::cvtColor(image,image,CV_BGR2BGRA);
                     }
                     //image is now 4 channel, unknown depth but not 8 bit
                     if(_image.depth()>=5){//float
