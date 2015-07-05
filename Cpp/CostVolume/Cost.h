@@ -2,6 +2,8 @@
 #define COST_H
 #include <opencv2/core/core.hpp>
 #include <vector>
+#include <thread>
+#include <memory>
 #include "tictoc.h"
 // The cost volume. Conceptually arranged as an image plane, corresponding
 // to the keyframe, lying on top of the actual cost volume, a 3D two channel matrix storing
@@ -132,6 +134,8 @@ private:
     //Thread management
     public:
         volatile bool running_a, running_qd;
+        std::unique_ptr<std::thread> threadQD;
+        std::unique_ptr<std::thread> threadA;
 };
 
 

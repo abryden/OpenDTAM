@@ -193,7 +193,7 @@ bool Track::align_level_largedef_gray_forward(const Mat& T,//Total Mem cost ~185
         gradI.create(r,c,CV_32FC2);
 
         int from_to[] = { 0,0, 1,1, 2,2 };
-        Mat src[1]=pulledBack;
+        Mat src[1]={pulledBack};
         Mat dst[2]={I,gradI};
         
         mixChannels(src,1,dst,2,from_to,3);// extract the image and the resampled gradient //(Mem cost: min 3 load, 3 store :6)

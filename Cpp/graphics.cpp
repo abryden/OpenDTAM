@@ -1,7 +1,10 @@
 #include <opencv2/highgui/highgui.hpp>
-#include <boost/thread/mutex.hpp>
 #include <queue>
 #include <string>
+#include <thread>
+#include <mutex>
+#include <chrono>
+#include <iostream>
 #include "set_affinity.h"
 #include "utils/ImplThreadLaunch.hpp"
 #include "graphics.hpp"
@@ -14,7 +17,7 @@ static queue<Vec2d> autoScale;
 
 static queue<int> props;
 static queue<string> nameWin;
-static boost::mutex Gmux; 
+static mutex Gmux;
 static volatile int ready=0;
 static volatile int pausing=0;
 int allDie=0;
@@ -24,7 +27,7 @@ void gpause(){
 }
 void gcheck(){
     while(ready||CV_XADD(&pausing,0)){
-        usleep(100);
+        this_thread::sleep_for(chrono::microseconds(100));
         if(allDie)
                     return;
     }
@@ -46,7 +49,7 @@ void pfShow(const string name,const Mat& _mat,int defaultscale, Vec2d autoscale)
     
     Gmux.unlock();
     while(nameShow.size()>5||pausing){
-        usleep(100);
+        this_thread::sleep_for(chrono::microseconds(100));
         if(allDie)
                     return;
     }
@@ -59,7 +62,7 @@ void pfWindow(const string name,int prop){
 
     Gmux.unlock();
     while(nameWin.size()>5||pausing){
-        usleep(100);
+        this_thread::sleep_for(chrono::microseconds(100));
         if(allDie)
                     return;
     }

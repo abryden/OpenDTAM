@@ -5,12 +5,15 @@ cmake_policy(SET CMP0012 NEW)
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/local_store/Qt/5.3/gcc_64/lib/cmake")# "/local_store/opencv-2.4.9/debug/unix-install/")
 #message(STATUS ${CMAKE_MODULE_PATH})
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb")
+if (CMAKE_SYSTEM_NAME MATCHES Linux)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -ggdb")
+endif()
 
 find_package(OpenCV 3 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(CUDA REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+#set(Boost_USE_STATIC_LIBS   ON)
+#find_package(Boost REQUIRED COMPONENTS system)
 #add_definitions( -D__OPENCV_BUILD=1 )
 #message(STATUS ${OpenCV_CONSIDERED_CONFIGS})
 
@@ -32,7 +35,7 @@ endmacro(add_sources)
 
 
 set(BASEPATH "${CMAKE_SOURCE_DIR}")
- 
+
 
 #add_library(GraphicsLib SHARED graphics.cpp)#must be in own library so we can link against it.
 
@@ -45,7 +48,7 @@ add_subdirectory(utils)
 add_subdirectory(Scheduler)
 
 
-include_directories("${BASEPATH}" ${CUDA_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories("${BASEPATH}" ${CUDA_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
   -gencode arch=compute_30,code=sm_30;
@@ -56,8 +59,13 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
   -lineinfo;
   -O3
 )
-cuda_add_library(OpenDTAM SHARED ${DTAM_SOURCES} OpenDTAM.cpp)
-target_link_libraries(OpenDTAM opencv_cudaimgproc opencv_cudastereo ${Boost_LIBRARIES})
-add_executable (a.out testprog.cpp convertAhandaPovRayToStandard.cpp graphics.cpp)
-target_link_libraries( a.out  OpenDTAM ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
+if (CMAKE_SYSTEM_NAME MATCHES Windows)
+  cuda_add_executable (OpenDTAMDemo testprog.cpp convertAhandaPovRayToStandard.cpp graphics.cpp ${DTAM_SOURCES} OpenDTAM.cpp)
+  target_link_libraries(OpenDTAMDemo  opencv_cudaimgproc opencv_cudastereo ${OpenCV_LIBS})
+else()
+cuda_add_library(OpenDTAM SHARED ${DTAM_SOURCES} OpenDTAM.cpp)
+target_link_libraries(OpenDTAM opencv_cudaimgproc opencv_cudastereo)
+add_executable (a.out testprog.cpp convertAhandaPovRayToStandard.cpp graphics.cpp)
+target_link_libraries( a.out  OpenDTAM ${OpenCV_LIBS})
+endif()

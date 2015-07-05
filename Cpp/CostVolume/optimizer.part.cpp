@@ -3,11 +3,22 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
+#if defined(WIN32)
+#else
 #include <unistd.h>
+#endif
 #include <cmath>
 #include "graphics.hpp"
 #include "set_affinity.h"
 #include "Cost.h"
+
+
+#if defined(WIN32)
+#define NOINLINE __declspec(noinline)
+#else
+#define NOINLINE __attribute__((noinline))
+#endif
+
 //relations: 
 //gwhatever=0.5*(gwhatever+ghere)
 //gright,gdown are negated
@@ -233,19 +244,19 @@ inline float Cost::aBasic(float* data,float l,float ds,float d,float& value){
 //     return (A-C)/(A-2*B+C)*.5+float(discreteMin-loind);
 // }
 
-static void* Cost_optimizeQD(void* object);
-static void* Cost_optimizeA(void* object);
+static void* Cost_optimizeQD(Cost* cost);
+static void* Cost_optimizeA(Cost* cost);
 static void launch_optimzer_thread(Cost& cost);
 
 
-static void launch_optimzer_threads(const Cost* cost){
-    pthread_t threadQD,threadA;
-    pthread_create( &threadQD, NULL, Cost_optimizeQD, (void*) cost);
-    pthread_create( &threadA, NULL, Cost_optimizeA, (void*) cost);
+static void launch_optimzer_threads(Cost* cost){
+    cost->threadQD = make_unique<thread>(Cost_optimizeQD, cost);
+    cost->threadA = make_unique<thread>(Cost_optimizeA, cost);
 }
-static void* Cost_optimizeQD(void* object){
+static void* Cost_optimizeQD(Cost* cost){
+#if !defined(WIN32)
     pthread_setname_np(pthread_self(),"QDthread");
-    Cost* cost = (Cost*)object;
+#endif
     set_affinity(2);
     cost->running_qd=true;
     while(cost->running_a){
@@ -255,9 +266,10 @@ static void* Cost_optimizeQD(void* object){
     }
     cost->running_qd=false;
 }
-static void* Cost_optimizeA(void* object){
+static void* Cost_optimizeA(Cost* cost){
+#if !defined(WIN32)
     pthread_setname_np(pthread_self(),"Athread");
-    Cost* cost = (Cost*)object;
+#endif
     set_affinity(3);
     cost->running_a=true;
     while(cost->running_a){
@@ -270,15 +282,17 @@ static void* Cost_optimizeA(void* object){
 void Cost::optimize(){
     if(!running_a){
         // Wait for QD to be done
-        while(running_qd)
-          usleep(100);
+        if (threadQD)
+            threadQD->join();
+        if (threadA)
+            threadA->join();
         launch_optimzer_threads(this);
     }else{
         cout<<"Already running optimizer!"<<"\n";
     }
 }
 
-static void __attribute__ ((noinline)) qcore(
+static void NOINLINE qcore(
     const float denom,
     st point, 
     const st pstop, 
@@ -434,12 +448,7 @@ toc();
 //     pfShow("a",_a);
     assert(aptr==_a.data);
     gcheck();
-    usleep(1);
-    
-
-        
-
-    
+    this_thread::sleep_for(chrono::microseconds(1));
 }
 
 void Cost::optimizeA(){ 
@@ -497,7 +506,7 @@ void Cost::optimizeA(){
 
 
 
-static void __attribute__ ((noinline)) qcore(
+static void NOINLINE qcore(
     const float denom,
     st point, 
     const st pstop, 

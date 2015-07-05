@@ -101,16 +101,25 @@ namespace cv{
             int alloced;
             int dInited;
             void setStream(Stream s){CV_Assert(!"Not Implemented");};
-            Stream getStream(){CV_Assert(!"Not Implemented");};
-            
+            Stream getStream(){
+                CV_Assert(!"Not Implemented");
+                return Stream();
+            };
+
             void setAlpha(float alpha){CV_Assert(!"Not Implemented");};
-            float getAlpha(){CV_Assert(!"Not Implemented");};
-            
+            float getAlpha(){
+                CV_Assert(!"Not Implemented");
+                return 0;
+            };
+
             void setBeta(float beta){CV_Assert(!"Not Implemented");};
-            float getBeta(){CV_Assert(!"Not Implemented");};
+            float getBeta(){
+                CV_Assert(!"Not Implemented");
+                return 0;
+            };
 
             Stream cvStream;
-        }; 
+        };
     }
 }
 #endif // DepthmapDenoiseWeightedHuber_H
