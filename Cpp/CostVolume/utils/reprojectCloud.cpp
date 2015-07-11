@@ -153,7 +153,7 @@ Mat diagnosticInfo(const Mat comparison,const Mat _im, const Mat _depth, const M
     float* xydf=(float *)(tmp.data);
     Mat_<float> xmap(im.rows,im.cols,-9999.9);//9999.9's are to guarantee that pixels are invalid 
     Mat_<float> ymap(im.rows,im.cols,-9999.9);//9999.9's are to guarantee that pixels are invalid 
-    Mat_<float> zmap(im.rows,im.cols,-1.0/0.0);//9999.9's are to guarantee that pixels are invalid 
+    Mat_<float> zmap(im.rows,im.cols,-std::numeric_limits<float>::infinity());//9999.9's are to guarantee that pixels are invalid
     float* xm=(float*)(xmap.data);
     float* ym=(float*)(ymap.data);
 

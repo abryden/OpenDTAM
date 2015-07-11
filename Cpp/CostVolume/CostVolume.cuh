@@ -12,6 +12,7 @@ namespace cv { namespace gpu { namespace device { namespace dtam_updateCost{
         };
     extern cudaStream_t localStream;
     
+	typedef unsigned int uint;
 
     void updateCostColCaller( int y, m33 sliceToIm, float weight, uint  rows, uint  cols, uint  layers, uint layerStep, float* hdata, float* cdata, float* lo, float* hi, float* loInd, float3* base,  float* bf, cudaTextureObject_t tex);
     void passThroughCaller( float weight, uint  rows, uint  cols, uint  layers, uint layerStep, float* hdata, float* cdata, float* lo, float* hi, float* loInd, float3* base,  float* bf, cudaTextureObject_t tex);

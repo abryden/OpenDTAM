@@ -82,8 +82,9 @@ int App_main( int argc, char** argv )
         int offset=0;
         if(inc>0){
             
-        loadAhanda("/home/paulf/Downloads/60fps_images_archieve/",
+//         loadAhanda("/home/paulf/Downloads/60fps_images_archieve/",
 //         loadAhanda("/home/paulf/Downloads/traj_over_table/",
+        loadAhanda(argc == 2 ? argv[1] : "/home/paulf/Downloads/60fps_images_archieve/",
                    65535,
                    i+offset,
                    image,

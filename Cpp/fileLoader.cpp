@@ -30,7 +30,7 @@ void loadAhanda(const char * rootpath,
                 cout<<"Loading"<<endl;
     }
     
-    convertAhandaPovRayToStandard(txt[imageNumber].c_str(),
+    convertAhandaPovRayToStandard(txt[imageNumber].string().c_str(),
                                       cameraMatrix,
                                       R,
                                       T);

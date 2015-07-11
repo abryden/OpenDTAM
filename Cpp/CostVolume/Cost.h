@@ -1,6 +1,8 @@
 #ifndef COST_H
 #define COST_H
 #include <opencv2/core/core.hpp>
+#include <boost/thread.hpp>
+#include <boost/smart_ptr.hpp>
 #include <vector>
 #include "tictoc.h"
 // The cost volume. Conceptually arranged as an image plane, corresponding
@@ -132,6 +134,8 @@ private:
     //Thread management
     public:
         volatile bool running_a, running_qd;
+        boost::scoped_ptr<boost::thread> threadQD;
+        boost::scoped_ptr<boost::thread> threadA;
 };
 
 

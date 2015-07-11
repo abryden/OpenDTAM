@@ -2,6 +2,8 @@
 #include <opencv2/core/core.hpp>//for CV_Assert
 #include "DepthmapDenoiseWeightedHuber.cuh"
 
+typedef unsigned int uint;
+
 namespace cv { namespace gpu { namespace device {
     namespace dtam_denoise{
 

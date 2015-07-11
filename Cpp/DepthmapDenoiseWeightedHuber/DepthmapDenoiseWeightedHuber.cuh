@@ -2,6 +2,8 @@
 #ifndef COSTVOLUME_CUH
 #define COSTVOLUME_CUH
 #include <opencv2/gpu/device/common.hpp>//for cudaStream_t
+
+typedef unsigned int uint;
 namespace cv { namespace gpu { namespace device { namespace dtam_denoise{
     struct m33{
             float data[9];
