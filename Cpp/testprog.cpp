@@ -262,23 +262,29 @@ int App_main( int argc, char** argv )
             pfShow("loVal", ret, 0, cv::Vec2d(0, 3));
              cv.loInd.download(ret);
             pfShow("loInd", ret, 0, cv::Vec2d(0, layers));
-            cout<<"diffN0:"<<sum(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
-            cout<<"diffN0Med:"<<median(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
+            if(D0[cv.fid].cols>0&&D0[cv.fid].rows>0){
+                cout<<"diffN0:"<<sum(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
+                cout<<"diffN0Med:"<<median(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
+            }
             medianBlur(ret,ret,3);
             medianBlur(ret,ret,3);
             pfShow("loIndMed",ret, 0, cv::Vec2d(0, layers));
-            cout<<"diffMedN0:"<<sum(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
-            cout<<"diffMedN0Med:"<<median(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
+            if(D0[cv.fid].cols>0&&D0[cv.fid].rows>0){
+                cout<<"diffMedN0:"<<sum(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
+                cout<<"diffMedN0Med:"<<median(abs(D0[cv.fid]-(ret*cv.depthStep+cv.far)))<<endl;
+            }
             a.download(ret);
             pfShow("A function loose", ret, 0, cv::Vec2d(0, layers));
             Mat diff=ret.clone();
             cv.loInd.download(ret);
             diff-=ret;
             pfShow("difference by reg", diff, 0, cv::Vec2d(-layers, layers));
-            pfShow("true Depth", D0[cv.fid], 0, cv::Vec2d(0, cv.near));
-            pfShow("diff", D0[cv.fid]-optimizer.depthMap(), 0, cv::Vec2d(-.005,.005));
-            cout<<"diff:"<<sum(abs(D0[cv.fid]-optimizer.depthMap()))<<endl;
-            cout<<"diffMed:"<<median(abs(D0[cv.fid]-optimizer.depthMap()))<<endl;
+            if(D0[cv.fid].cols>0&&D0[cv.fid].rows>0){
+                pfShow("true Depth", D0[cv.fid], 0, cv::Vec2d(0, cv.near));
+                pfShow("diff", D0[cv.fid]-optimizer.depthMap(), 0, cv::Vec2d(-.005,.005));
+                cout<<"diff:"<<sum(abs(D0[cv.fid]-optimizer.depthMap()))<<endl;
+                cout<<"diffMed:"<<median(abs(D0[cv.fid]-optimizer.depthMap()))<<endl;
+            }
             
 //                gpause();
 //             cout<<"A iterations: "<< Acount<< "  QD iterations: "<<QDcount<<endl;
