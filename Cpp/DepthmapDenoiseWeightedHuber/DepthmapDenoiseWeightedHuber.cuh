@@ -1,6 +1,6 @@
 
-#ifndef COSTVOLUME_CUH
-#define COSTVOLUME_CUH
+#ifndef DEPTHMAPDENOISEWEIGHTEDHUBER_CUH
+#define DEPTHMAPDENOISEWEIGHTEDHUBER_CUH
 #include <opencv2/core/cuda/common.hpp>//for cudaStream_t
 
 typedef unsigned int uint;
